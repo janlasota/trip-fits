@@ -294,6 +294,7 @@
     color:var(--ink-soft);
     margin:-4px 0 14px;
     min-height:16px;
+    text-align:center;
   }
   #geo-status.found{color:var(--terracotta-dark);}
   .forecast{
@@ -424,8 +425,7 @@
           var place = data.results[0];
           state.lat = place.latitude;
           state.lon = place.longitude;
-          var region = place.admin1 ? (', ' + place.admin1) : '';
-          setGeoStatus('Forecasting for ' + place.name + region + ', ' + place.country, true);
+          setGeoStatus('', false);
           save();
           fetchForecast();
         } else {
@@ -514,7 +514,7 @@
       return '<div class="forecast unavailable">' + formatDateNice(dateStr) + ' \u2014 forecast not available yet</div>';
     }
     var w = weatherIconAndLabel(f.code);
-    return '<div class="forecast">' + w.icon + '&nbsp;' + formatDateNice(dateStr) + ', ' + w.label + ' \u2014 <span class="hi">' + f.hi + '\u00b0</span> / ' + f.lo + '\u00b0</div>';
+    return '<div class="forecast">' + w.icon + '&nbsp;' + formatDateNice(dateStr) + ', ' + w.label + ' <span class="hi">' + f.hi + '\u00b0</span> / ' + f.lo + '\u00b0</div>';
   }
 
   function compressImage(file, cb){
