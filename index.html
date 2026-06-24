@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Trip outfits</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23C4633F%22/><text x=%2250%22 y=%2268%22 font-size=%2255%22 text-anchor=%22middle%22 fill=%22%23FAF6F0%22>T</text></svg>">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Trip outfits">
+<meta name="theme-color" content="#FAF6F0">
+<style>
+  :root{
+    --cream:#FAF6F0;
+    --paper:#FFFFFF;
+    --ink:#2B2520;
+    --ink-soft:#6B6155;
+    --line:#E8E0D4;
+    --terracotta:#C4633F;
+    --terracotta-dark:#9A4A2D;
+    --terracotta-tint:#F3E2DA;
+    --navy:#3D4A5C;
+    --navy-dark:#2A3340;
+    --navy-tint:#E2E6EA;
+    --danger:#B3433A;
+    --radius:14px;
+    --radius-sm:9px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:48px;
+  }
+  .wrap{max-width:520px;margin:0 auto;padding:0 18px;}
+  header{
+    padding:28px 0 18px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:12px;
+  }
+  header h1{
+    font-family:Georgia,"Times New Roman",serif;
+    font-weight:400;
+    font-size:28px;
+    margin:0;
+    letter-spacing:0.2px;
+  }
+  header .sub{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:4px;
+  }
+  #trip-name{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:28px;
+    border:none;
+    background:transparent;
+    color:var(--ink);
+    width:100%;
+    padding:0;
+    outline:none;
+  }
+  #trip-name::placeholder{color:var(--ink-soft);opacity:0.6;}
+  .add-btn{
+    flex-shrink:0;
+    width:44px;height:44px;
+    border-radius:50%;
+    border:1.5px solid var(--ink);
+    background:var(--ink);
+    color:var(--cream);
+    font-size:24px;
+    line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+  .add-btn:active{transform:scale(0.94);}
+  #status{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    color:var(--ink-soft);
+    height:18px;
+    margin-bottom:4px;
+  }
+  #status.error{color:var(--danger);}
+  .spinner{
+    width:13px;height:13px;
+    border-radius:50%;
+    border:1.5px solid var(--line);
+    border-top-color:var(--ink-soft);
+    animation:spin 0.7s linear infinite;
+    flex-shrink:0;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .day-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    margin-bottom:18px;
+    overflow:hidden;
+  }
+  .day-card-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 16px 10px;
+  }
+  .day-label{
+    flex:1;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:18px;
+    border:none;
+    background:transparent;
+    color:var(--ink);
+    padding:4px 0;
+    outline:none;
+    border-bottom:1px solid transparent;
+  }
+  .day-label:focus{border-bottom:1px solid var(--line);}
+  .icon-btn{
+    width:32px;height:32px;
+    border-radius:50%;
+    border:none;
+    background:transparent;
+    color:var(--ink-soft);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .icon-btn:active{background:var(--line);}
+  .icon-btn svg{width:16px;height:16px;}
+  .divider-row{
+    display:flex;
+    align-items:center;
+    padding:0 16px;
+  }
+  .divider-row .line{flex:1;height:1px;background:var(--line);}
+  .divider-row .mark{
+    width:26px;height:26px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    margin:0 -13px;
+    background:var(--paper);
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+    position:relative;
+    z-index:1;
+  }
+  .divider-row .mark svg{width:13px;height:13px;}
+  .slot{
+    padding:14px 16px 16px;
+  }
+  .slot-label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    margin-bottom:10px;
+  }
+  .slot-label svg{width:14px;height:14px;}
+  .slot.day .slot-label{color:var(--terracotta-dark);}
+  .slot.night .slot-label{color:var(--navy-dark);}
+  .photo-box{
+    position:relative;
+    border-radius:var(--radius-sm);
+    overflow:hidden;
+  }
+  .photo-box img{
+    width:100%;
+    height:240px;
+    object-fit:cover;
+    display:block;
+  }
+  .photo-empty{
+    height:160px;
+    border-radius:var(--radius-sm);
+    border:1.5px dashed var(--line);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    cursor:pointer;
+    color:var(--ink-soft);
+    font-size:13px;
+  }
+  .slot.day .photo-empty{background:var(--terracotta-tint);border-color:#E2BBA8;}
+  .slot.night .photo-empty{background:var(--navy-tint);border-color:#C3CBD3;}
+  .photo-empty svg{width:26px;height:26px;opacity:0.7;}
+  .remove-photo{
+    position:absolute;top:8px;right:8px;
+    width:30px;height:30px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.92);
+    border:none;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+  .remove-photo svg{width:14px;height:14px;color:var(--ink);}
+  textarea.note{
+    width:100%;
+    margin-top:10px;
+    border:1px solid var(--line);
+    border-radius:var(--radius-sm);
+    background:var(--cream);
+    font-family:inherit;
+    font-size:14px;
+    color:var(--ink);
+    padding:10px 12px;
+    resize:none;
+    outline:none;
+  }
+  textarea.note:focus{border-color:var(--ink-soft);}
+  textarea.note::placeholder{color:var(--ink-soft);opacity:0.7;}
+  input[type=file]{display:none;}
+  .empty-state{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--ink-soft);
+  }
+  .empty-state svg{width:40px;height:40px;opacity:0.5;margin-bottom:10px;}
+  .empty-state p{font-size:14px;margin:4px 0;}
+  .empty-state button{
+    margin-top:16px;
+    border:1.5px solid var(--ink);
+    background:var(--ink);
+    color:var(--cream);
+    border-radius:999px;
+    padding:10px 22px;
+    font-size:14px;
+    cursor:pointer;
+  }
+  footer{
+    text-align:center;
+    font-size:11px;
+    color:var(--ink-soft);
+    padding:20px 0 6px;
+    opacity:0.7;
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .day-card{transition:transform 0.15s ease;}
+  }
+  .trip-meta{
+    display:flex;
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .trip-meta > div{flex:1;min-width:0;}
+  .trip-meta label{
+    display:block;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--ink-soft);
+    margin-bottom:4px;
+  }
+  .trip-meta input{
+    width:100%;
+    box-sizing:border-box;
+    height:38px;
+    border:1px solid var(--line);
+    border-radius:var(--radius-sm);
+    background:var(--paper);
+    font-family:inherit;
+    font-size:14px;
+    color:var(--ink);
+    padding:0 10px;
+    outline:none;
+    -webkit-appearance:none;
+    appearance:none;
+  }
+  .trip-meta input:focus{border-color:var(--ink-soft);}
+  .trip-meta input[type="date"]{
+    padding-right:6px;
+  }
+  .trip-meta input[type="date"]::-webkit-date-and-time-value{
+    text-align:left;
+  }
+  .trip-meta input[type="date"]::-webkit-calendar-picker-indicator{
+    margin-right:0;
+    padding:0 4px;
+  }
+  #geo-status{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin:-4px 0 14px;
+    min-height:16px;
+  }
+  #geo-status.found{color:var(--terracotta-dark);}
+  .forecast{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 16px;
+    font-size:13px;
+    color:var(--ink-soft);
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    background:var(--cream);
+  }
+  .forecast svg{width:16px;height:16px;flex-shrink:0;}
+  .forecast .hi{font-weight:600;color:var(--ink);}
+  .forecast.unavailable{font-style:italic;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div style="flex:1;min-width:0;">
+      <input id="trip-name" placeholder="Trip name" maxlength="40" />
+      <div class="sub">plan your outfits for each day and night</div>
+    </div>
+    <button class="add-btn" id="add-day-btn" aria-label="Add day">+</button>
+  </header>
+  <div class="trip-meta">
+    <div>
+      <label for="destination">Destination</label>
+      <input id="destination" placeholder="e.g. Lisbon" maxlength="60" />
+    </div>
+    <div>
+      <label for="start-date">Start date</label>
+      <input id="start-date" type="date" />
+    </div>
+  </div>
+  <div id="geo-status"></div>
+  <div id="status"></div>
+  <div id="days"></div>
+  <div class="empty-state" id="empty-state" style="display:none;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 6V4a3 3 0 0 1 6 0v2M4 9l3-3h10l3 3-2 13H6L4 9Z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <p>No days yet.</p>
+    <p>Add your first day to start planning outfits.</p>
+    <button id="empty-add-btn">Add day 1</button>
+  </div>
+  <footer>saved on this device only</footer>
+</div>
+
+<script>
+(function(){
+  var STORAGE_KEY = 'trip-outfit-planner-v1';
+  var state = { tripName:'', destination:'', startDate:'', lat:null, lon:null, forecast:{}, days:[] };
+  var geoTimer = null;
+
+  function uid(){ return Math.random().toString(36).slice(2,9); }
+  function emptySlot(){ return { photo:null, note:'' }; }
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) state = Object.assign({ tripName:'', destination:'', startDate:'', lat:null, lon:null, forecast:{}, days:[] }, JSON.parse(raw));
+    }catch(e){ state = { tripName:'', destination:'', startDate:'', lat:null, lon:null, forecast:{}, days:[] }; }
+    document.getElementById('trip-name').value = state.tripName || '';
+    document.getElementById('destination').value = state.destination || '';
+    document.getElementById('start-date').value = state.startDate || '';
+    if(state.lat!=null && state.destination){
+      setGeoStatus(state.destination, true);
+    }
+    render();
+    if(state.lat!=null && state.lon!=null){ fetchForecast(); }
+  }
+
+  function setStatusError(text){
+    var s = document.getElementById('status');
+    s.className = 'error';
+    s.textContent = text;
+  }
+  function clearStatus(){
+    var s = document.getElementById('status');
+    s.className = '';
+    s.innerHTML = '';
+  }
+
+  function save(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      clearStatus();
+    }catch(e){
+      setStatusError('Storage full \u2014 try removing an older photo');
+    }
+  }
+
+  function addDay(){
+    state.days.push({ id:uid(), label:'Day ' + (state.days.length+1), day:emptySlot(), night:emptySlot() });
+    save();
+    render();
+  }
+
+  function removeDay(id){
+    state.days = state.days.filter(function(d){ return d.id!==id; });
+    save();
+    render();
+  }
+
+  function findDay(id){
+    return state.days.find(function(d){ return d.id===id; });
+  }
+
+  function setGeoStatus(text, found){
+    var el = document.getElementById('geo-status');
+    el.textContent = text || '';
+    el.className = found ? 'found' : '';
+  }
+
+  function geocodeDestination(name){
+    if(!name || name.trim().length < 2){
+      state.lat = null; state.lon = null; state.forecast = {};
+      setGeoStatus('', false);
+      save(); render();
+      return;
+    }
+    setGeoStatus('Looking up ' + name + '...', false);
+    fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&name=' + encodeURIComponent(name.trim()))
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(data && data.results && data.results.length){
+          var place = data.results[0];
+          state.lat = place.latitude;
+          state.lon = place.longitude;
+          var region = place.admin1 ? (', ' + place.admin1) : '';
+          setGeoStatus('Forecasting for ' + place.name + region + ', ' + place.country, true);
+          save();
+          fetchForecast();
+        } else {
+          state.lat = null; state.lon = null; state.forecast = {};
+          setGeoStatus('Could not find that place \u2014 check spelling', false);
+          save(); render();
+        }
+      })
+      .catch(function(){
+        setGeoStatus('Could not reach the weather service \u2014 check connection', false);
+      });
+  }
+
+  var forecastLoading = false;
+
+  function fetchForecast(){
+    if(state.lat==null || state.lon==null) return;
+    forecastLoading = true;
+    render();
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=' + state.lat + '&longitude=' + state.lon +
+          '&daily=temperature_2m_max,temperature_2m_min,weathercode&temperature_unit=fahrenheit&timezone=auto&forecast_days=16')
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        forecastLoading = false;
+        if(data && data.daily && data.daily.time){
+          var map = {};
+          data.daily.time.forEach(function(dateStr, i){
+            map[dateStr] = {
+              hi: Math.round(data.daily.temperature_2m_max[i]),
+              lo: Math.round(data.daily.temperature_2m_min[i]),
+              code: data.daily.weathercode[i]
+            };
+          });
+          state.forecast = map;
+          save();
+        }
+        render();
+      })
+      .catch(function(){
+        forecastLoading = false;
+        setStatusError('Could not fetch forecast \u2014 will retry when online');
+        render();
+      });
+  }
+
+  function dateForDay(index){
+    if(!state.startDate) return null;
+    var parts = state.startDate.split('-').map(Number);
+    var d = new Date(parts[0], parts[1]-1, parts[2]);
+    d.setDate(d.getDate() + index);
+    var y = d.getFullYear();
+    var m = String(d.getMonth()+1).padStart(2,'0');
+    var dd = String(d.getDate()).padStart(2,'0');
+    return y + '-' + m + '-' + dd;
+  }
+
+  function formatDateNice(dateStr){
+    var parts = dateStr.split('-').map(Number);
+    var d = new Date(parts[0], parts[1]-1, parts[2]);
+    return d.toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' });
+  }
+
+  function weatherIconAndLabel(code){
+    if(code===0) return { icon:'\u2600\uFE0F', label:'Clear' };
+    if(code<=3) return { icon:'\uD83C\uDF24\uFE0F', label:'Partly cloudy' };
+    if(code===45||code===48) return { icon:'\uD83C\uDF2B\uFE0F', label:'Foggy' };
+    if(code>=51&&code<=57) return { icon:'\uD83C\uDF26\uFE0F', label:'Drizzle' };
+    if(code>=61&&code<=67) return { icon:'\uD83C\uDF27\uFE0F', label:'Rain' };
+    if(code>=71&&code<=77) return { icon:'\u2744\uFE0F', label:'Snow' };
+    if(code>=80&&code<=82) return { icon:'\uD83C\uDF27\uFE0F', label:'Showers' };
+    if(code>=95) return { icon:'\u26C8\uFE0F', label:'Storms' };
+    return { icon:'\uD83C\uDF24\uFE0F', label:'Mixed' };
+  }
+
+  function forecastHtml(dayIndex){
+    var dateStr = dateForDay(dayIndex);
+    if(!dateStr) return '';
+    if(state.lat==null){
+      return '';
+    }
+    var f = state.forecast[dateStr];
+    if(!f){
+      if(forecastLoading){
+        return '<div class="forecast"><span class="spinner"></span>&nbsp;Fetching forecast for ' + formatDateNice(dateStr) + '</div>';
+      }
+      return '<div class="forecast unavailable">' + formatDateNice(dateStr) + ' \u2014 forecast not available yet</div>';
+    }
+    var w = weatherIconAndLabel(f.code);
+    return '<div class="forecast">' + w.icon + '&nbsp;' + formatDateNice(dateStr) + ', ' + w.label + ' \u2014 <span class="hi">' + f.hi + '\u00b0</span> / ' + f.lo + '\u00b0</div>';
+  }
+
+  function compressImage(file, cb){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var img = new Image();
+      img.onload = function(){
+        var maxDim = 1000;
+        var w = img.width, h = img.height;
+        if(w > h && w > maxDim){ h = Math.round(h * maxDim / w); w = maxDim; }
+        else if(h > maxDim){ w = Math.round(w * maxDim / h); h = maxDim; }
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        cb(canvas.toDataURL('image/jpeg', 0.72));
+      };
+      img.onerror = function(){ cb(null); };
+      img.src = e.target.result;
+    };
+    reader.onerror = function(){ cb(null); };
+    reader.readAsDataURL(file);
+  }
+
+  function handlePhoto(dayId, slotKey, file){
+    if(!file) return;
+    var box = document.getElementById('box-' + dayId + '-' + slotKey);
+    if(box){ box.innerHTML = '<span class="spinner"></span>'; }
+    compressImage(file, function(dataUrl){
+      if(!dataUrl){
+        if(box){ box.innerHTML = cameraIcon + '<span>Could not read photo \u2014 try again</span>'; }
+        return;
+      }
+      var d = findDay(dayId);
+      if(d){ d[slotKey].photo = dataUrl; save(); render(); }
+    });
+  }
+
+  function removePhoto(dayId, slotKey){
+    var d = findDay(dayId);
+    if(d){ d[slotKey].photo = null; save(); render(); }
+  }
+
+  var sunIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2.5 12H5M19 12h2.5M4.2 19.8l1.8-1.8M18 6l1.8-1.8" stroke-linecap="round"/></svg>';
+  var moonIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" stroke-linejoin="round"/></svg>';
+  var cameraIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z" stroke-linejoin="round"/><circle cx="12" cy="14" r="3.3"/></svg>';
+  var xIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18" stroke-linecap="round"/></svg>';
+  var trashIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M9 7V4.8c0-.4.4-.8.9-.8h4.2c.5 0 .9.4.9.8V7M6 7l1 13c0 .6.5 1 1 1h8c.5 0 1-.4 1-1l1-13" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function slotHtml(d, slotKey, label, icon){
+    var slot = d[slotKey];
+    var inputId = 'file-' + d.id + '-' + slotKey;
+    var photoHtml;
+    if(slot.photo){
+      photoHtml = '<div class="photo-box">' +
+        '<img src="' + slot.photo + '" alt="' + label + ' outfit photo" />' +
+        '<button class="remove-photo" data-day="' + d.id + '" data-slot="' + slotKey + '" aria-label="Remove photo">' + xIcon + '</button>' +
+        '</div>';
+    } else {
+      photoHtml = '<label for="' + inputId + '" class="photo-empty" id="box-' + d.id + '-' + slotKey + '">' + cameraIcon + '<span>Add photo</span></label>';
+    }
+    return '<div class="slot ' + slotKey + '">' +
+      '<div class="slot-label">' + icon + label + '</div>' +
+      photoHtml +
+      '<input type="file" accept="image/*" capture="environment" id="' + inputId + '" data-day="' + d.id + '" data-slot="' + slotKey + '" class="photo-input" />' +
+      '<textarea class="note" data-day="' + d.id + '" data-slot="' + slotKey + '" rows="2" placeholder="Note \u2014 e.g. green dress, bring a jacket">' + (slot.note||'') + '</textarea>' +
+      '</div>';
+  }
+
+  function dayCardHtml(d, index){
+    return '<div class="day-card">' +
+      '<div class="day-card-head">' +
+        '<input type="text" class="day-label" data-day="' + d.id + '" value="' + (d.label||'').replace(/"/g,'&quot;') + '" />' +
+        '<button class="icon-btn remove-day-btn" data-day="' + d.id + '" aria-label="Remove day">' + trashIcon + '</button>' +
+      '</div>' +
+      forecastHtml(index) +
+      slotHtml(d, 'day', 'Day', sunIcon) +
+      '<div class="divider-row"><div class="line"></div><div class="mark">' + moonIcon + '</div><div class="line"></div></div>' +
+      slotHtml(d, 'night', 'Night', moonIcon) +
+      '</div>';
+  }
+
+  function render(){
+    var container = document.getElementById('days');
+    var empty = document.getElementById('empty-state');
+    if(state.days.length===0){
+      container.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    container.innerHTML = state.days.map(function(d,i){ return dayCardHtml(d,i); }).join('');
+
+    container.querySelectorAll('.photo-input').forEach(function(inp){
+      inp.addEventListener('change', function(e){
+        handlePhoto(inp.dataset.day, inp.dataset.slot, e.target.files[0]);
+      });
+    });
+    container.querySelectorAll('.remove-photo').forEach(function(btn){
+      btn.addEventListener('click', function(){ removePhoto(btn.dataset.day, btn.dataset.slot); });
+    });
+    container.querySelectorAll('.note').forEach(function(ta){
+      ta.addEventListener('change', function(){
+        var d = findDay(ta.dataset.day);
+        if(d){ d[ta.dataset.slot].note = ta.value; save(); }
+      });
+    });
+    container.querySelectorAll('.day-label').forEach(function(inp){
+      inp.addEventListener('change', function(){
+        var d = findDay(inp.dataset.day);
+        if(d){ d.label = inp.value; save(); }
+      });
+    });
+    container.querySelectorAll('.remove-day-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){ removeDay(btn.dataset.day); });
+    });
+  }
+
+  document.getElementById('add-day-btn').addEventListener('click', addDay);
+  document.getElementById('empty-add-btn').addEventListener('click', addDay);
+  document.getElementById('trip-name').addEventListener('change', function(e){
+    state.tripName = e.target.value; save();
+  });
+  document.getElementById('destination').addEventListener('input', function(e){
+    var val = e.target.value;
+    state.destination = val;
+    clearTimeout(geoTimer);
+    geoTimer = setTimeout(function(){ geocodeDestination(val); }, 700);
+  });
+  document.getElementById('start-date').addEventListener('change', function(e){
+    state.startDate = e.target.value;
+    save();
+    render();
+  });
+
+  // iOS Safari sometimes doesn't fire blur when tapping outside an input,
+  // especially in home-screen/standalone mode. Force it explicitly.
+  document.addEventListener('touchend', function(e){
+    var active = document.activeElement;
+    if(!active) return;
+    var tag = active.tagName;
+    if(tag!=='INPUT' && tag!=='TEXTAREA') return;
+    if(e.target===active || active.contains(e.target)) return;
+    active.blur();
+  }, { passive:true });
+  document.addEventListener('mousedown', function(e){
+    var active = document.activeElement;
+    if(!active) return;
+    var tag = active.tagName;
+    if(tag!=='INPUT' && tag!=='TEXTAREA') return;
+    if(e.target===active || active.contains(e.target)) return;
+    if(e.target.tagName==='LABEL') return;
+    active.blur();
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>
