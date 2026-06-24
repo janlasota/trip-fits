@@ -231,38 +231,35 @@
   .empty-state p{font-size:14px;margin:4px 0;}
   .empty-state button{
     margin-top:16px;
+  }
+  .pill-btn{
+    flex-shrink:0;
     border:1.5px solid var(--ink);
     background:var(--ink);
     color:var(--cream);
     border-radius:999px;
     padding:10px 22px;
     font-size:14px;
+    font-family:inherit;
     cursor:pointer;
   }
+  .pill-btn:active{transform:scale(0.97);}
   footer{
-    text-align:center;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:20px 0 6px;
+  }
+  footer:not(:has(#clear-trip-btn:not([hidden]))){justify-content:center;}
+  .footer-note{
     font-size:11px;
     color:var(--ink-soft);
-    padding:20px 0 6px;
     opacity:0.7;
   }
-  .clear-trip-btn{
-    display:block;
-    margin:10px auto 0;
-    border:none;
-    background:none;
-    font:inherit;
-    font-size:11px;
-    color:var(--ink-soft);
-    cursor:pointer;
-    padding:6px 10px;
-    text-decoration:underline;
-    text-underline-offset:2px;
-  }
-  .clear-trip-btn:active{color:var(--danger);}
   .clear-trip-btn.confirming{
-    color:var(--danger);
-    text-decoration:none;
+    background:var(--danger);
+    border-color:var(--danger);
   }
   @media (prefers-reduced-motion:no-preference){
     .day-card{transition:transform 0.15s ease;}
@@ -308,12 +305,17 @@
   .destination-wrap.loading input{padding-right:34px;}
   .destination-wrap.loading .destination-spinner{display:block;}
   .trip-meta input[type="date"]{
+    cursor:pointer;
     padding-right:6px;
+  }
+  .trip-meta input[type="date"]:focus{
+    cursor:text;
   }
   .trip-meta input[type="date"]::-webkit-date-and-time-value{
     text-align:left;
   }
   .trip-meta input[type="date"]::-webkit-calendar-picker-indicator{
+    cursor:pointer;
     margin-right:0;
     padding:0 4px;
   }
@@ -371,11 +373,11 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 6V4a3 3 0 0 1 6 0v2M4 9l3-3h10l3 3-2 13H6L4 9Z" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <p>No days yet.</p>
     <p>Add your first day to start planning outfits.</p>
-    <button id="empty-add-btn">Add day 1</button>
+    <button id="empty-add-btn" class="pill-btn">Add day 1</button>
   </div>
   <footer>
-    saved on this device only
-    <button type="button" id="clear-trip-btn" class="clear-trip-btn" hidden>Start over</button>
+    <span class="footer-note">saved on this device only</span>
+    <button type="button" id="clear-trip-btn" class="clear-trip-btn pill-btn" hidden>Start over</button>
   </footer>
 </div>
 
