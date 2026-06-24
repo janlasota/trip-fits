@@ -246,6 +246,24 @@
     padding:20px 0 6px;
     opacity:0.7;
   }
+  .clear-trip-btn{
+    display:block;
+    margin:10px auto 0;
+    border:none;
+    background:none;
+    font:inherit;
+    font-size:11px;
+    color:var(--ink-soft);
+    cursor:pointer;
+    padding:6px 10px;
+    text-decoration:underline;
+    text-underline-offset:2px;
+  }
+  .clear-trip-btn:active{color:var(--danger);}
+  .clear-trip-btn.confirming{
+    color:var(--danger);
+    text-decoration:none;
+  }
   @media (prefers-reduced-motion:no-preference){
     .day-card{transition:transform 0.15s ease;}
   }
@@ -355,7 +373,10 @@
     <p>Add your first day to start planning outfits.</p>
     <button id="empty-add-btn">Add day 1</button>
   </div>
-  <footer>saved on this device only</footer>
+  <footer>
+    saved on this device only
+    <button type="button" id="clear-trip-btn" class="clear-trip-btn" hidden>Start over</button>
+  </footer>
 </div>
 
 <script>
@@ -363,6 +384,8 @@
   var STORAGE_KEY = 'trip-outfit-planner-v1';
   var state = { tripName:'', destination:'', startDate:'', lat:null, lon:null, forecast:{}, days:[] };
   var geoTimer = null;
+  var clearTripConfirming = false;
+  var clearTripTimer = null;
 
   function uid(){ return Math.random().toString(36).slice(2,9); }
   function emptySlot(){ return { photo:null, note:'' }; }
@@ -409,6 +432,52 @@
     state.days = state.days.filter(function(d){ return d.id!==id; });
     save();
     render();
+  }
+
+  function hasTripContent(){
+    return !!(state.tripName || state.destination || state.startDate || state.days.length);
+  }
+
+  function updateClearButton(){
+    var btn = document.getElementById('clear-trip-btn');
+    btn.hidden = !hasTripContent();
+    if(btn.hidden) resetClearButton();
+  }
+
+  function resetClearButton(){
+    clearTripConfirming = false;
+    clearTimeout(clearTripTimer);
+    clearTripTimer = null;
+    var btn = document.getElementById('clear-trip-btn');
+    btn.textContent = 'Start over';
+    btn.classList.remove('confirming');
+  }
+
+  function performClearTrip(){
+    clearTimeout(geoTimer);
+    geoTimer = null;
+    state = { tripName:'', destination:'', startDate:'', lat:null, lon:null, forecast:{}, days:[] };
+    setDestinationLoading(false);
+    setGeoStatus('');
+    clearStatus();
+    localStorage.removeItem(STORAGE_KEY);
+    document.getElementById('trip-name').value = '';
+    document.getElementById('destination').value = '';
+    document.getElementById('start-date').value = '';
+    resetClearButton();
+    render();
+  }
+
+  function handleClearTripClick(){
+    if(!clearTripConfirming){
+      clearTripConfirming = true;
+      var btn = document.getElementById('clear-trip-btn');
+      btn.textContent = 'Tap again to clear everything';
+      btn.classList.add('confirming');
+      clearTripTimer = setTimeout(resetClearButton, 4000);
+      return;
+    }
+    performClearTrip();
   }
 
   function findDay(id){
@@ -632,6 +701,7 @@
     if(state.days.length===0){
       container.innerHTML = '';
       empty.style.display = 'block';
+      updateClearButton();
       return;
     }
     empty.style.display = 'none';
@@ -660,10 +730,12 @@
     container.querySelectorAll('.remove-day-btn').forEach(function(btn){
       btn.addEventListener('click', function(){ removeDay(btn.dataset.day); });
     });
+    updateClearButton();
   }
 
   document.getElementById('add-day-btn').addEventListener('click', addDay);
   document.getElementById('empty-add-btn').addEventListener('click', addDay);
+  document.getElementById('clear-trip-btn').addEventListener('click', handleClearTripClick);
   document.getElementById('trip-name').addEventListener('change', function(e){
     state.tripName = e.target.value; save();
   });
