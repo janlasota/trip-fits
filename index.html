@@ -477,7 +477,11 @@
               code: data.daily.weathercode[i]
             };
           });
-          state.forecast = map;
+          var kept = {};
+          Object.keys(state.forecast).forEach(function(dateStr){
+            if(dateStr < todayStr()) kept[dateStr] = state.forecast[dateStr];
+          });
+          state.forecast = Object.assign(kept, map);
           save();
         }
         render();
@@ -487,6 +491,11 @@
         setStatusError('Could not fetch forecast \u2014 will retry when online');
         render();
       });
+  }
+
+  function todayStr(){
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   }
 
   function dateForDay(index){
@@ -525,11 +534,13 @@
       return '';
     }
     var f = state.forecast[dateStr];
+    var isPast = dateStr < todayStr();
     if(!f){
+      if(isPast) return '';
       if(forecastLoading){
         return '<div class="forecast"><span class="spinner"></span><span>Fetching forecast for ' + formatDateNice(dateStr) + '</span></div>';
       }
-      return '<div class="forecast unavailable"><span>' + formatDateNice(dateStr) + ' \u2014 forecast not available yet</span></div>';
+      return '<div class="forecast unavailable"><span>' + formatDateNice(dateStr) + ' forecast not available yet</span></div>';
     }
     var w = weatherIconAndLabel(f.code);
     return '<div class="forecast"><span class="forecast-main">' + w.icon + ' ' + formatDateNice(dateStr) + ', ' + w.label + '</span><span class="forecast-temps"><span class="hi">' + f.hi + '\u00b0</span> / ' + f.lo + '\u00b0</span></div>';
