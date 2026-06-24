@@ -279,6 +279,16 @@
     appearance:none;
   }
   .trip-meta input:focus{border-color:var(--ink-soft);}
+  .destination-wrap{position:relative;}
+  .destination-wrap .destination-spinner{
+    position:absolute;
+    right:10px;
+    top:12px;
+    display:none;
+    pointer-events:none;
+  }
+  .destination-wrap.loading input{padding-right:34px;}
+  .destination-wrap.loading .destination-spinner{display:block;}
   .trip-meta input[type="date"]{
     padding-right:6px;
   }
@@ -292,11 +302,10 @@
   #geo-status{
     font-size:12px;
     color:var(--ink-soft);
-    margin:-4px 0 14px;
-    min-height:16px;
+    margin:0 0 14px;
     text-align:center;
   }
-  #geo-status.found{color:var(--terracotta-dark);}
+  #geo-status:empty{display:none;}
   .forecast{
     display:flex;
     align-items:center;
@@ -309,7 +318,9 @@
     background:var(--cream);
   }
   .forecast svg{width:16px;height:16px;flex-shrink:0;}
-  .forecast .hi{font-weight:600;color:var(--ink);}
+  .forecast-main{flex:1;min-width:0;}
+  .forecast .hi{font-weight:600;}
+  .forecast-temps{white-space:nowrap;color:var(--ink);}
   .forecast.unavailable{font-style:italic;}
 </style>
 </head>
@@ -325,7 +336,10 @@
   <div class="trip-meta">
     <div>
       <label for="destination">Destination</label>
-      <input id="destination" placeholder="e.g. Lisbon" maxlength="60" />
+      <div class="destination-wrap" id="destination-wrap">
+        <input id="destination" placeholder="e.g. Lisbon" maxlength="60" />
+        <span class="destination-spinner spinner" aria-hidden="true"></span>
+      </div>
     </div>
     <div>
       <label for="start-date">Start date</label>
@@ -361,9 +375,6 @@
     document.getElementById('trip-name').value = state.tripName || '';
     document.getElementById('destination').value = state.destination || '';
     document.getElementById('start-date').value = state.startDate || '';
-    if(state.lat!=null && state.destination){
-      setGeoStatus(state.destination, true);
-    }
     render();
     if(state.lat!=null && state.lon!=null){ fetchForecast(); }
   }
@@ -404,38 +415,45 @@
     return state.days.find(function(d){ return d.id===id; });
   }
 
-  function setGeoStatus(text, found){
+  function setDestinationLoading(loading){
+    document.getElementById('destination-wrap').classList.toggle('loading', !!loading);
+  }
+
+  function setGeoStatus(text){
     var el = document.getElementById('geo-status');
     el.textContent = text || '';
-    el.className = found ? 'found' : '';
   }
 
   function geocodeDestination(name){
     if(!name || name.trim().length < 2){
       state.lat = null; state.lon = null; state.forecast = {};
-      setGeoStatus('', false);
+      setDestinationLoading(false);
+      setGeoStatus('');
       save(); render();
       return;
     }
-    setGeoStatus('Looking up ' + name + '...', false);
+    setDestinationLoading(true);
+    setGeoStatus('');
     fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&name=' + encodeURIComponent(name.trim()))
       .then(function(r){ return r.json(); })
       .then(function(data){
+        setDestinationLoading(false);
         if(data && data.results && data.results.length){
           var place = data.results[0];
           state.lat = place.latitude;
           state.lon = place.longitude;
-          setGeoStatus('', false);
+          setGeoStatus('');
           save();
           fetchForecast();
         } else {
           state.lat = null; state.lon = null; state.forecast = {};
-          setGeoStatus('Could not find that place \u2014 check spelling', false);
+          setGeoStatus('Could not find that place \u2014 check spelling');
           save(); render();
         }
       })
       .catch(function(){
-        setGeoStatus('Could not reach the weather service \u2014 check connection', false);
+        setDestinationLoading(false);
+        setGeoStatus('Could not reach the weather service \u2014 check connection');
       });
   }
 
@@ -509,12 +527,12 @@
     var f = state.forecast[dateStr];
     if(!f){
       if(forecastLoading){
-        return '<div class="forecast"><span class="spinner"></span>&nbsp;Fetching forecast for ' + formatDateNice(dateStr) + '</div>';
+        return '<div class="forecast"><span class="spinner"></span><span>Fetching forecast for ' + formatDateNice(dateStr) + '</span></div>';
       }
-      return '<div class="forecast unavailable">' + formatDateNice(dateStr) + ' \u2014 forecast not available yet</div>';
+      return '<div class="forecast unavailable"><span>' + formatDateNice(dateStr) + ' \u2014 forecast not available yet</span></div>';
     }
     var w = weatherIconAndLabel(f.code);
-    return '<div class="forecast">' + w.icon + '&nbsp;' + formatDateNice(dateStr) + ', ' + w.label + ' <span class="hi">' + f.hi + '\u00b0</span> / ' + f.lo + '\u00b0</div>';
+    return '<div class="forecast"><span class="forecast-main">' + w.icon + ' ' + formatDateNice(dateStr) + ', ' + w.label + '</span><span class="forecast-temps"><span class="hi">' + f.hi + '\u00b0</span> / ' + f.lo + '\u00b0</span></div>';
   }
 
   function compressImage(file, cb){
